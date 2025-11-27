@@ -1,0 +1,141 @@
+.button {
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              border-color 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.button--primary {
+  background-color: #BEE0E7;
+}
+
+.button--primary:hover:not(.button--disabled),
+.button--primary.button--hover:not(.button--disabled) {
+  background-color: #9BCBD5 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Hover para botones primary con backgroundColor personalizado (modo claro) */
+.button--primary[style*="background-color: #F7F7F7"]:hover:not(.button--disabled),
+.button--primary[style*="background-color:#F7F7F7"]:hover:not(.button--disabled),
+.button--primary.button--hover[style*="background-color: #F7F7F7"]:not(.button--disabled),
+.button--primary.button--hover[style*="background-color:#F7F7F7"]:not(.button--disabled),
+.button--primary[style*="backgroundColor: #F7F7F7"]:hover:not(.button--disabled),
+.button--primary[style*="backgroundColor:#F7F7F7"]:hover:not(.button--disabled),
+.button--primary.button--hover[style*="backgroundColor: #F7F7F7"]:not(.button--disabled),
+.button--primary.button--hover[style*="backgroundColor:#F7F7F7"]:not(.button--disabled) {
+  background-color: #E8E8E8 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Hover para botones primary con backgroundColor personalizado (modo oscuro - #DEDEDE) */
+.button--primary[style*="background-color: #DEDEDE"]:hover:not(.button--disabled),
+.button--primary[style*="background-color:#DEDEDE"]:hover:not(.button--disabled),
+.button--primary.button--hover[style*="background-color: #DEDEDE"]:not(.button--disabled),
+.button--primary.button--hover[style*="background-color:#DEDEDE"]:not(.button--disabled),
+.button--primary[style*="backgroundColor: #DEDEDE"]:hover:not(.button--disabled),
+.button--primary[style*="backgroundColor:#DEDEDE"]:hover:not(.button--disabled),
+.button--primary.button--hover[style*="backgroundColor: #DEDEDE"]:not(.button--disabled),
+.button--primary.button--hover[style*="backgroundColor:#DEDEDE"]:not(.button--disabled) {
+  background-color: #F0F0F0 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Hover para botones primary con backgroundColor personalizado (modo oscuro - #3D3D3D) */
+.button--primary[style*="background-color: #3D3D3D"]:hover:not(.button--disabled),
+.button--primary[style*="background-color:#3D3D3D"]:hover:not(.button--disabled),
+.button--primary.button--hover[style*="background-color: #3D3D3D"]:not(.button--disabled),
+.button--primary.button--hover[style*="background-color:#3D3D3D"]:not(.button--disabled),
+.button--primary[style*="backgroundColor: #3D3D3D"]:hover:not(.button--disabled),
+.button--primary[style*="backgroundColor:#3D3D3D"]:hover:not(.button--disabled),
+.button--primary.button--hover[style*="backgroundColor: #3D3D3D"]:not(.button--disabled),
+.button--primary.button--hover[style*="backgroundColor:#3D3D3D"]:not(.button--disabled) {
+  background-color: #4D4D4D !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.button--secondary {
+  background-color: #FEFCF3;
+  border: 1px solid #524E4E;
+}
+
+.button--secondary:hover:not(.button--disabled),
+.button--secondary.button--hover:not(.button--disabled) {
+  background-color: #E8E8E8 !important;
+  border-color: #2A2A2A !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+.button--danger {
+  background-color: #FF6B6B;
+}
+
+.button--danger:hover:not(.button--disabled),
+.button--danger.button--hover:not(.button--disabled) {
+  background-color: #B01A15 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(176, 26, 21, 0.35) !important;
+}
+
+.button--small {
+  padding: 8px 12px;
+}
+
+.button--medium {
+  padding: 12px 16px;
+}
+
+.button--large {
+  padding: 16px 24px;
+}
+
+.button--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button--disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.button__text {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+}
+
+.button__text--primary {
+  color: #524E4E;
+}
+
+.button__text--secondary {
+  color: #524E4E;
+}
+
+.button__text--danger {
+  color: #FFFFFF;
+}
+
+.button__text--small {
+  font-size: 14px;
+}
+
+.button__text--medium {
+  font-size: 16px;
+}
+
+.button__text--large {
+  font-size: 18px;
+}
+

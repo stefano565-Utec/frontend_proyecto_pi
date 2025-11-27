@@ -1,0 +1,78 @@
+.pedido-card {
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(190, 224, 231, 0.3) !important;
+}
+
+.pedido-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+.pedido-card__header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pedido-card__title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #524E4E;
+}
+
+.pedido-card__estado-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.pedido-card__estado-text {
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pedido-card__info-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pedido-card__label {
+  font-size: 14px;
+  color: #524E4E;
+}
+
+.pedido-card__value {
+  font-size: 14px;
+  color: #524E4E;
+  font-weight: 500;
+}
+
+.pedido-card__total {
+  font-size: 16px;
+  font-weight: bold;
+  color: #524E4E;
+}
+
+.pedido-card__items-container {
+  margin-bottom: 12px;
+}
+
+.pedido-card__item-text {
+  font-size: 14px;
+  color: #524E4E;
+  margin-left: 8px;
+  margin-top: 4px;
+}
+
+.pedido-card__actions {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  margin-top: 12px;
+}
+

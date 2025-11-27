@@ -1,0 +1,16 @@
+.loading {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  flex-direction: column;
+  background-color: #FEFCF3; /* Color de fondo de la app */
+}
+
+.loading__text {
+  margin-top: 12px;
+  font-size: 16px;
+  color: #524E4E;
+}
+

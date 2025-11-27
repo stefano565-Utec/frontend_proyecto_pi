@@ -1,0 +1,13 @@
+.toggle-switch {
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.toggle-switch:active {
+  opacity: 0.8;
+}
+
+.toggle-circle {
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

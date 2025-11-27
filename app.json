@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "frontend_proyecto_pi",
-    "slug": "frontend_proyecto_pi",
+    "name": "Comedor UTEC",
+    "slug": "comedor-utec",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -22,7 +22,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "usesCleartextTraffic": true
     },
     "web": {
       "bundler": "metro",

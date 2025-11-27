@@ -1,0 +1,66 @@
+.menu-card {
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(190, 224, 231, 0.3) !important;
+}
+
+.menu-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+.menu-card__header {
+  margin-bottom: 8px;
+}
+
+.menu-card__title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #524E4E;
+  margin-bottom: 4px;
+}
+
+.menu-card__vendor {
+  font-size: 14px;
+  color: #BEE0E7;
+  font-style: italic;
+}
+
+.menu-card__description {
+  font-size: 14px;
+  color: #524E4E;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.menu-card__info {
+  margin-bottom: 12px;
+}
+
+.menu-card__info-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.menu-card__label {
+  font-size: 14px;
+  color: #524E4E;
+}
+
+.menu-card__price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #524E4E;
+}
+
+.menu-card__stock {
+  font-size: 14px;
+  color: #524E4E;
+}
+
+.menu-card__stock--empty {
+  color: #FF6B6B;
+}
+

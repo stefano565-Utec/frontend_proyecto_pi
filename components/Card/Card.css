@@ -1,0 +1,30 @@
+.card {
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 12px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(190, 224, 231, 0.3);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Para React Native Web */
+@media (min-width: 768px) {
+  .card {
+    padding: 24px;
+    margin: 16px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+    margin: 8px 0;
+  }
+}
+
