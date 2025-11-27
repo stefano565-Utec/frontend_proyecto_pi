@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { dashboardService } from '../../services';
 import type { DashboardStats } from '../../services/api';
 import { Loading, Card } from '../../components';
@@ -92,6 +93,9 @@ export default function DashboardScreen() {
       alignItems: 'center',
       backgroundColor: colors.cardBackground,
     },
+    statIconContainer: {
+      marginBottom: 8,
+    },
     statValue: {
       fontSize: 32,
       fontWeight: 'bold',
@@ -103,6 +107,14 @@ export default function DashboardScreen() {
       color: colors.textSecondary,
       opacity: 0.7,
       textAlign: 'center',
+    },
+    sectionTitleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    sectionTitleIcon: {
+      marginRight: 8,
     },
     quickActions: {
       flexDirection: 'row',
@@ -119,8 +131,7 @@ export default function DashboardScreen() {
       borderWidth: 1,
       borderColor: colors.border,
     },
-    quickActionIcon: {
-      fontSize: 32,
+    quickActionIconContainer: {
       marginBottom: 8,
     },
     quickActionText: {
@@ -162,21 +173,36 @@ export default function DashboardScreen() {
 
       {/* Estadísticas de Usuarios */}
       <View style={dynamicStyles.section}>
-        <Text style={dynamicStyles.sectionTitle}>👥 Usuarios</Text>
+        <View style={dynamicStyles.sectionTitleContainer}>
+          <FontAwesome name="users" size={20} color={colors.primary} style={dynamicStyles.sectionTitleIcon} />
+          <Text style={dynamicStyles.sectionTitle}>Usuarios</Text>
+        </View>
         <View style={dynamicStyles.statsGrid}>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="users" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalUsers ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Total Usuarios</Text>
           </Card>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="user" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalRegularUsers ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Usuarios</Text>
           </Card>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="shopping-bag" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalVendors ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Vendedores</Text>
           </Card>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="shield" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalAdmins ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Administradores</Text>
           </Card>
@@ -185,13 +211,22 @@ export default function DashboardScreen() {
 
       {/* Estadísticas de Vendors y Menús */}
       <View style={dynamicStyles.section}>
-        <Text style={dynamicStyles.sectionTitle}>🏪 Vendors y Menús</Text>
+        <View style={dynamicStyles.sectionTitleContainer}>
+          <FontAwesome name="shopping-bag" size={20} color={colors.primary} style={dynamicStyles.sectionTitleIcon} />
+          <Text style={dynamicStyles.sectionTitle}>Vendors y Menús</Text>
+        </View>
         <View style={dynamicStyles.statsGrid}>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="building" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalVendorsEntities ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Vendors</Text>
           </Card>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="cutlery" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalMenuItems ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Menús</Text>
           </Card>
@@ -200,17 +235,29 @@ export default function DashboardScreen() {
 
       {/* Estadísticas de Pedidos */}
       <View style={dynamicStyles.section}>
-        <Text style={dynamicStyles.sectionTitle}>📦 Pedidos</Text>
+        <View style={dynamicStyles.sectionTitleContainer}>
+          <FontAwesome name="shopping-cart" size={20} color={colors.primary} style={dynamicStyles.sectionTitleIcon} />
+          <Text style={dynamicStyles.sectionTitle}>Pedidos</Text>
+        </View>
         <View style={dynamicStyles.statsGrid}>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="list-alt" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalOrders ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Total Pedidos</Text>
           </Card>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="calendar" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalOrdersToday ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Hoy</Text>
           </Card>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="calendar-o" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalOrdersThisWeek ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Esta Semana</Text>
           </Card>
@@ -219,9 +266,15 @@ export default function DashboardScreen() {
 
       {/* Estadísticas de Feedback */}
       <View style={dynamicStyles.section}>
-        <Text style={dynamicStyles.sectionTitle}>💬 Comentarios</Text>
+        <View style={dynamicStyles.sectionTitleContainer}>
+          <FontAwesome name="comments" size={20} color={colors.primary} style={dynamicStyles.sectionTitleIcon} />
+          <Text style={dynamicStyles.sectionTitle}>Comentarios</Text>
+        </View>
         <View style={dynamicStyles.statsGrid}>
           <Card style={dynamicStyles.statCard}>
+            <View style={dynamicStyles.statIconContainer}>
+              <FontAwesome name="comment" size={24} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.statValue}>{stats.totalFeedback ?? 0}</Text>
             <Text style={dynamicStyles.statLabel}>Total Comentarios</Text>
           </Card>
@@ -230,27 +283,36 @@ export default function DashboardScreen() {
 
       {/* Accesos Rápidos */}
       <View style={dynamicStyles.section}>
-        <Text style={dynamicStyles.sectionTitle}>⚡ Accesos Rápidos</Text>
+        <View style={dynamicStyles.sectionTitleContainer}>
+          <FontAwesome name="bolt" size={20} color={colors.primary} style={dynamicStyles.sectionTitleIcon} />
+          <Text style={dynamicStyles.sectionTitle}>Accesos Rápidos</Text>
+        </View>
         <View style={dynamicStyles.quickActions}>
           <TouchableOpacity
             style={dynamicStyles.quickActionButton}
             onPress={() => router.push('/(tabs)/gestionar-usuarios')}
           >
-            <Text style={dynamicStyles.quickActionIcon}>👥</Text>
+            <View style={dynamicStyles.quickActionIconContainer}>
+              <FontAwesome name="users" size={32} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.quickActionText}>Usuarios</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={dynamicStyles.quickActionButton}
             onPress={() => router.push('/(tabs)/gestionar-vendors')}
           >
-            <Text style={dynamicStyles.quickActionIcon}>🏪</Text>
+            <View style={dynamicStyles.quickActionIconContainer}>
+              <FontAwesome name="shopping-bag" size={32} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.quickActionText}>Vendors</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={dynamicStyles.quickActionButton}
             onPress={() => router.push('/(tabs)/comentarios')}
           >
-            <Text style={dynamicStyles.quickActionIcon}>💬</Text>
+            <View style={dynamicStyles.quickActionIconContainer}>
+              <FontAwesome name="comments" size={32} color={colors.primary} />
+            </View>
             <Text style={dynamicStyles.quickActionText}>Comentarios</Text>
           </TouchableOpacity>
         </View>
