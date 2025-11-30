@@ -73,7 +73,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ visible, total, vendorId, o
     >
       <View style={styles.modalOverlay}>
         <Card style={styles.modalContent}>
-          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+          <ScrollView style={styles.scrollView} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
             <Text style={styles.title}>Método de Pago</Text>
             <Text style={styles.total}>Total a pagar: S/ {total.toFixed(2)}</Text>
 
@@ -114,20 +114,21 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ visible, total, vendorId, o
               </>
             )}
 
-            <View style={styles.actions}>
-              <Button variant="secondary" onPress={handleClose} style={styles.button}>
-                Cancelar
-              </Button>
-              <Button
-                variant="primary"
-                onPress={handleConfirm}
-                style={styles.button}
-                disabled={!selectedMethod}
-              >
-                Continuar
-              </Button>
-            </View>
           </ScrollView>
+
+          <View style={styles.actions}>
+            <Button variant="secondary" onPress={handleClose} style={styles.button}>
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              onPress={handleConfirm}
+              style={styles.button}
+              disabled={!selectedMethod}
+            >
+              Continuar
+            </Button>
+          </View>
         </Card>
       </View>
     </Modal>
@@ -145,6 +146,7 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 400,
     padding: 24,
+    maxHeight: '80%',
   } as const,
   title: {
     fontSize: 24,
@@ -211,7 +213,7 @@ const styles = StyleSheet.create({
     flex: 1,
   } as const,
   scrollView: {
-    flex: 1,
+    flexGrow: 1,
   } as const,
   loadingText: {
     fontSize: 14,
