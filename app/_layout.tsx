@@ -8,6 +8,7 @@ import { Platform, AppState } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import 'react-native-reanimated';
 import { AuthProvider, ThemeProvider, useTheme } from '../context';
+import DialogProvider from './components/DialogProvider';
 
 export {
   ErrorBoundary,
@@ -74,7 +75,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <RootLayoutNav />
+        <DialogProvider>
+          <RootLayoutNav />
+        </DialogProvider>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -1,18 +1,66 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, TouchableOpacity, Platform, RefreshControl } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { useRouter } from 'expo-router';
 import { menuItemService, orderService, vendorService } from '../../services';
 import { useAuth, useTheme } from '../../context';
 import type { MenuItem, Vendor, OrderItem, Order } from '../../types';
-import { Button, Loading, MenuCard, PaymentModal } from '../../components';
+import { Button, Loading, MenuCard, PaymentModal, Card } from '../../components';
 
 type FilterType = 'today' | 'week' | 'date' | null;
 
 export default function MenusScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
+  // Custom renderers to ensure calendar respects theme on mobile
+  const renderCalendarHeader = (date: any) => {
+    const d = new Date(date);
+    const title = d.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+    return (
+      <View style={{ backgroundColor: colors.cardBackground, paddingVertical: 10 }}>
+        <Text style={{ textAlign: 'center', color: colors.text, fontWeight: '700' }}>{title}</Text>
+      </View>
+    );
+  };
+
+  const DayComponent = ({ date, state, marking, onPress }: any) => {
+    const isSelected = marking?.selected;
+    const isDisabled = marking?.disabled;
+    const dayText = String(date?.day || '');
+
+    const selectedTextColor = isDark ? colors.surface : colors.text;
+
+    return (
+      <TouchableOpacity
+        onPress={() => onPress && onPress(date)}
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 6,
+          width: 48,
+          height: 48,
+        }}
+        activeOpacity={0.7}
+        disabled={isDisabled}
+      >
+        {isSelected ? (
+          <View style={{
+            backgroundColor: colors.primary,
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Text style={{ color: selectedTextColor, fontWeight: '600' }}>{dayText}</Text>
+          </View>
+        ) : (
+          <Text style={{ color: isDisabled ? colors.textSecondary : colors.text }}>{dayText}</Text>
+        )}
+      </TouchableOpacity>
+    );
+  };
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [menuItemsFiltrados, setMenuItemsFiltrados] = useState<MenuItem[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -24,10 +72,11 @@ export default function MenusScreen() {
   const [searchText, setSearchText] = useState('');
   const [modalReserva, setModalReserva] = useState<MenuItem | null>(null);
   const [cantidad, setCantidad] = useState(1);
-  const [carrito, setCarrito] = useState<Array<{ item: MenuItem; quantity: number; vendorId: number }>>([]);
+  const [carrito, setCarrito] = useState<Array<{ item: MenuItem; quantity: number; vendorId: number; date?: string }>>([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [hoveredFilter, setHoveredFilter] = useState<string | null>(null);
   const usuarioId = user?.id || 0;
+  const [refreshing, setRefreshing] = useState(false);
 
   // Obtener fecha de hoy en formato yyyy-MM-dd
   const getTodayDate = () => {
@@ -80,6 +129,18 @@ export default function MenusScreen() {
     };
     initData();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await cargarVendors();
+      await cargarMenuItemsConFiltros();
+    } catch (e) {
+      // silent
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     // Solo cargar menús si las fechas ya están inicializadas
@@ -211,11 +272,15 @@ export default function MenusScreen() {
   const agregarAlCarrito = () => {
     if (!modalReserva) return;
 
-    const itemExistente = carrito.find(c => c.item.id === modalReserva.id && c.vendorId === modalReserva.vendorId);
-    
+    // Determine reservation date: prefer modalReserva.date if present (menu-specific),
+    // else use selectedDate (when user used date filter), otherwise today
+    const reservationDate = modalReserva?.date ? (modalReserva.date.split('T')[0]) : (selectedDate || getTodayDate());
+
+    const itemExistente = carrito.find(c => c.item.id === modalReserva.id && c.vendorId === modalReserva.vendorId && c.date === reservationDate);
+
     if (itemExistente) {
       setCarrito(carrito.map(c => 
-        c.item.id === modalReserva.id && c.vendorId === modalReserva.vendorId
+        c.item.id === modalReserva.id && c.vendorId === modalReserva.vendorId && c.date === reservationDate
           ? { ...c, quantity: c.quantity + cantidad }
           : c
       ));
@@ -223,7 +288,8 @@ export default function MenusScreen() {
       setCarrito([...carrito, { 
         item: modalReserva, 
         quantity: cantidad,
-        vendorId: modalReserva.vendorId 
+        vendorId: modalReserva.vendorId,
+        date: reservationDate,
       }]);
     }
 
@@ -245,32 +311,47 @@ export default function MenusScreen() {
         return;
       }
 
-      // Agrupar items por vendorId para crear pedidos separados
-      const pedidosPorVendor = new Map<number, OrderItem[]>();
-      
+      // Agrupar items por vendorId y por fecha de reserva para crear pedidos separados
+      const pedidosMap = new Map<string, OrderItem[]>();
+      // Key format: `${vendorId}::${date || 'nodate'}`
+
       carrito.forEach(c => {
         const vendorId = c.vendorId || c.item.vendorId;
-        if (!pedidosPorVendor.has(vendorId)) {
-          pedidosPorVendor.set(vendorId, []);
+        const dateKey = c.date || '';
+        const mapKey = `${vendorId}::${dateKey}`;
+        if (!pedidosMap.has(mapKey)) {
+          pedidosMap.set(mapKey, []);
         }
-        pedidosPorVendor.get(vendorId)!.push({
+        // include date in item payload (backend may accept extra fields)
+        pedidosMap.get(mapKey)!.push({
           menuItemId: c.item.id!,
           quantity: c.quantity,
-        });
+          // @ts-ignore allow extra prop
+          date: dateKey,
+        } as any);
       });
 
       // Crear un pedido por cada vendor
       const pedidosCreados: Order[] = [];
       
       try {
-        const pedidosPromises = Array.from(pedidosPorVendor.entries()).map(async ([vendorId, items]) => {
-          const orderResponse = await orderService.create({
+        const pedidosPromises = Array.from(pedidosMap.entries()).map(async ([mapKey, items]) => {
+          // mapKey is `${vendorId}::${date}`
+          const [vendorIdStr, dateStr] = mapKey.split('::');
+          const vendorId = parseInt(vendorIdStr, 10);
+          const orderBody: any = {
             userId: usuarioId,
             vendorId: vendorId,
             paymentMethod: paymentMethod,
             items: items,
-          });
-          
+          };
+          if (dateStr) {
+            // ensure only yyyy-MM-dd is sent (strip time if present)
+            orderBody.date = dateStr.split('T')[0];
+          }
+
+          const orderResponse = await orderService.create(orderBody);
+
           return orderResponse.data;
         });
         
@@ -324,8 +405,10 @@ export default function MenusScreen() {
     }
   };
 
-  const eliminarDelCarrito = (itemId: number, vendorId?: number) => {
-    if (vendorId) {
+  const eliminarDelCarrito = (itemId: number, vendorId?: number, dateArg?: string) => {
+    if (vendorId && dateArg) {
+      setCarrito(carrito.filter(c => !(c.item.id === itemId && c.vendorId === vendorId && c.date === dateArg)));
+    } else if (vendorId) {
       setCarrito(carrito.filter(c => !(c.item.id === itemId && c.vendorId === vendorId)));
     } else {
       setCarrito(carrito.filter(c => c.item.id !== itemId));
@@ -404,10 +487,15 @@ export default function MenusScreen() {
     filterChipTextActive: {
       fontWeight: 'bold',
     },
+    carritoItemDate: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginTop: 4,
+    },
     calendarContainer: {
       marginTop: 12,
       marginBottom: 8,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.cardBackground,
       borderRadius: 12,
       padding: 12,
       shadowColor: colors.shadow,
@@ -533,7 +621,7 @@ export default function MenusScreen() {
       alignItems: 'center',
     },
     modalContent: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.cardBackground,
       borderRadius: 12,
       padding: 24,
       width: '90%',
@@ -608,7 +696,7 @@ export default function MenusScreen() {
 
   return (
     <View style={dynamicStyles.container}>
-      <ScrollView style={dynamicStyles.scrollView}>
+      <ScrollView style={dynamicStyles.scrollView} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View style={dynamicStyles.header}>
           <Text style={dynamicStyles.title}>Menús Disponibles</Text>
           
@@ -674,8 +762,12 @@ export default function MenusScreen() {
           {filterType === 'date' && (
             <View style={dynamicStyles.calendarContainer}>
               <Text style={dynamicStyles.filterLabel}>Selecciona una fecha:</Text>
+              <Card style={{ padding: 0 }}>
               <Calendar
+                key={isDark ? 'dark' : 'light'}
                 current={selectedDate}
+                renderHeader={renderCalendarHeader}
+                dayComponent={DayComponent}
                 onDayPress={(day) => {
                   setSelectedDate(day.dateString);
                 }}
@@ -687,19 +779,19 @@ export default function MenusScreen() {
                   },
                 }}
                 theme={{
-                  backgroundColor: '#FFFFFF',
-                  calendarBackground: '#FFFFFF',
-                  textSectionTitleColor: '#524E4E',
-                  selectedDayBackgroundColor: '#BEE0E7',
-                  selectedDayTextColor: '#524E4E',
-                  todayTextColor: '#BEE0E7',
-                  dayTextColor: '#524E4E',
-                  textDisabledColor: '#D3D3D3',
-                  dotColor: '#BEE0E7',
-                  selectedDotColor: '#524E4E',
-                  arrowColor: '#524E4E',
-                  monthTextColor: '#524E4E',
-                  indicatorColor: '#BEE0E7',
+                  backgroundColor: colors.cardBackground,
+                  calendarBackground: colors.cardBackground,
+                  textSectionTitleColor: colors.textSecondary,
+                  selectedDayBackgroundColor: colors.primary,
+                  selectedDayTextColor: colors.text,
+                  todayTextColor: colors.primary,
+                  dayTextColor: colors.text,
+                  textDisabledColor: colors.textSecondary,
+                  dotColor: colors.primary,
+                  selectedDotColor: colors.text,
+                  arrowColor: colors.primary,
+                  monthTextColor: colors.text,
+                  indicatorColor: colors.primary,
                   textDayFontWeight: '500',
                   textMonthFontWeight: 'bold',
                   textDayHeaderFontWeight: '600',
@@ -707,9 +799,10 @@ export default function MenusScreen() {
                   textMonthFontSize: 16,
                   textDayHeaderFontSize: 13,
                 }}
-                style={dynamicStyles.calendar}
+                style={[dynamicStyles.calendar, { backgroundColor: colors.cardBackground }]}
                 minDate={new Date().toISOString().split('T')[0]} // Solo permitir fechas futuras o hoy
               />
+              </Card>
             </View>
           )}
 
@@ -801,26 +894,31 @@ export default function MenusScreen() {
         <View style={dynamicStyles.carritoContainer}>
           <Text style={dynamicStyles.carritoTitle}>Carrito ({carrito.length} items)</Text>
           <ScrollView style={dynamicStyles.carritoItems}>
-            {carrito.map((c, index) => (
-              <View key={`${c.item.id}-${c.vendorId}-${index}`} style={dynamicStyles.carritoItem}>
-                <View style={dynamicStyles.carritoItemInfo}>
-                  <Text style={dynamicStyles.carritoItemText}>
-                    {c.quantity}x {c.item.itemName}
-                  </Text>
-                  {c.item.vendorName && (
-                    <Text style={dynamicStyles.carritoItemVendor}>
-                      Vendedor: {c.item.vendorName}
+              {carrito.map((c, index) => (
+                <View key={`${c.item.id}-${c.vendorId}-${index}-${c.date || 'nodate'}`} style={dynamicStyles.carritoItem}>
+                  <View style={dynamicStyles.carritoItemInfo}>
+                    <Text style={dynamicStyles.carritoItemText}>
+                      {c.quantity}x {c.item.itemName}
                     </Text>
-                  )}
-                  <Text style={dynamicStyles.carritoItemPrice}>
-                    S/ {parseFloat(c.item.price).toFixed(2)} c/u
-                  </Text>
+                    {c.item.vendorName && (
+                      <Text style={dynamicStyles.carritoItemVendor}>
+                        Vendedor: {c.item.vendorName}
+                      </Text>
+                    )}
+                    <Text style={dynamicStyles.carritoItemPrice}>
+                      S/ {parseFloat(c.item.price).toFixed(2)} c/u
+                    </Text>
+                    {c.date && (
+                      <Text style={dynamicStyles.carritoItemDate}>
+                        Fecha reserva: {new Date(c.date).toLocaleDateString()}
+                      </Text>
+                    )}
+                  </View>
+                  <TouchableOpacity onPress={() => eliminarDelCarrito(c.item.id!, c.vendorId, c.date)}>
+                    <Text style={dynamicStyles.carritoItemDelete}>Eliminar</Text>
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={() => eliminarDelCarrito(c.item.id!, c.vendorId)}>
-                  <Text style={dynamicStyles.carritoItemDelete}>Eliminar</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+              ))}
           </ScrollView>
           <View style={dynamicStyles.carritoTotal}>
             <Text style={dynamicStyles.carritoTotalText}>

@@ -4,6 +4,7 @@ import Button from '../Button/Button';
 import Card from '../Card/Card';
 import { vendorService } from '../../services';
 import type { Vendor } from '../../types';
+import { useTheme } from '../../context';
 import './PaymentModal.css';
 
 interface PaymentModalProps {
@@ -19,6 +20,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ visible, total, vendorId, o
   const [selectedMethod, setSelectedMethod] = useState<'YAPE' | null>(null);
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loadingVendor, setLoadingVendor] = useState(false);
+  const { colors } = useTheme();
 
   // Cargar información del vendor cuando se abre el modal
   useEffect(() => {
@@ -74,8 +76,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ visible, total, vendorId, o
       <View style={styles.modalOverlay}>
         <Card style={styles.modalContent}>
           <ScrollView style={styles.scrollView} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-            <Text style={styles.title}>Método de Pago</Text>
-            <Text style={styles.total}>Total a pagar: S/ {total.toFixed(2)}</Text>
+            <Text style={[styles.title, { color: colors.text }]}>Método de Pago</Text>
+            <Text style={[styles.total, { color: colors.text }]}>Total a pagar: S/ {total.toFixed(2)}</Text>
 
             {loadingVendor ? (
               <Text style={styles.loadingText}>Cargando información de pago...</Text>
@@ -85,7 +87,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ visible, total, vendorId, o
                   <TouchableOpacity
                     style={[
                       styles.methodOption,
-                      selectedMethod === 'YAPE' && styles.methodOptionSelected,
+                      { backgroundColor: colors.cardBackground, borderColor: colors.border },
+                      selectedMethod === 'YAPE' && { backgroundColor: colors.filterChipActive, borderColor: colors.filterChipActive },
                     ]}
                     onPress={() => handleMethodSelect('YAPE')}
                   >
@@ -93,7 +96,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ visible, total, vendorId, o
                     <Text
                       style={[
                         styles.methodText,
-                        selectedMethod === 'YAPE' && styles.methodTextSelected,
+                        selectedMethod === 'YAPE' && { color: colors.primary },
                       ]}
                     >
                       Yape
@@ -102,8 +105,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ visible, total, vendorId, o
                 </View>
 
                 {selectedMethod && (
-                  <View style={styles.infoBox}>
-                    <Text style={styles.infoText}>
+                  <View style={[styles.infoBox, { backgroundColor: colors.filterChipBackground, borderColor: colors.filterChipActive }] }>
+                    <Text style={[styles.infoText, { color: colors.text }] }>
                       El pago se procesará a través de Mercado Pago usando Yape.{'\n\n'}
                       Necesitarás ingresar:{'\n'}
                       • Tu número de celular (el que tienes asociado a tu cuenta Yape){'\n'}
@@ -151,14 +154,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#524E4E',
     marginBottom: 8,
     textAlign: 'center',
   } as const,
   total: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#524E4E',
     marginBottom: 24,
     textAlign: 'center',
   } as const,
@@ -173,14 +174,9 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#E0E0E0',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
   } as const,
-  methodOptionSelected: {
-    borderColor: '#BEE0E7',
-    backgroundColor: '#F0F9FA',
-  } as const,
+  methodOptionSelected: {} as const,
   methodIcon: {
     fontSize: 40,
     marginBottom: 8,
@@ -188,11 +184,8 @@ const styles = StyleSheet.create({
   methodText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#524E4E',
   } as const,
-  methodTextSelected: {
-    color: '#BEE0E7',
-  } as const,
+  methodTextSelected: {} as const,
   methodOptionDisabled: {
     opacity: 0.5,
   } as const,
@@ -217,21 +210,17 @@ const styles = StyleSheet.create({
   } as const,
   loadingText: {
     fontSize: 14,
-    color: '#524E4E',
     textAlign: 'center',
     marginVertical: 20,
   } as const,
   infoBox: {
     marginTop: 16,
     padding: 12,
-    backgroundColor: '#E3F2FD',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#BEE0E7',
   } as const,
   infoText: {
     fontSize: 13,
-    color: '#524E4E',
     lineHeight: 18,
     textAlign: 'center',
   } as const,

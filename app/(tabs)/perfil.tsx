@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Platform, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { userService } from '../../services';
 import { useAuth, useTheme } from '../../context';
@@ -13,6 +13,16 @@ export default function PerfilScreen() {
   const [loading, setLoading] = useState(true);
   const usuarioId = authUser?.id;
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await cargarUsuario();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     // Usar los datos del usuario autenticado directamente si están disponibles
@@ -189,7 +199,7 @@ export default function PerfilScreen() {
   });
 
   return (
-    <ScrollView style={dynamicStyles.container}>
+    <ScrollView style={dynamicStyles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}>
       <View style={dynamicStyles.header}>
         <Text style={dynamicStyles.title}>Mi Perfil</Text>
       </View>

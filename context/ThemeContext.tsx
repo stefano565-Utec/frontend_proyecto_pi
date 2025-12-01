@@ -45,7 +45,9 @@ const lightColors: ThemeColors = {
   border: '#D1D9E0',
   borderLight: '#E8EDF2',
   shadow: 'rgba(0, 0, 0, 0.1)',
-  cardBackground: '#FAFBFC',
+  // Card backgrounds are slightly different from the main surface
+  // Card backgrounds are slightly different from the main surface
+  cardBackground: '#F8FBFD',
   inputBackground: '#F8F9FA',
   filterChipBackground: '#F0F4F8',
   filterChipActive: '#BEE0E7',
@@ -65,7 +67,9 @@ const darkColors: ThemeColors = {
   border: '#404040',
   borderLight: '#353535',
   shadow: 'rgba(0, 0, 0, 0.5)',
-  cardBackground: '#2D2D2D',
+  // Card background for dark theme (slightly lighter than surface)
+  // Card background for dark theme (slightly lighter than surface)
+  cardBackground: '#222222',
   inputBackground: '#3A3A3A',
   filterChipBackground: '#353535',
   filterChipActive: '#4A9BA8',

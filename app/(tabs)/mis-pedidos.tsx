@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Modal, TextInput, TouchableOpacity, RefreshControl } from 'react-native';
+import { useDialog } from '../components/DialogProvider';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { orderService, feedbackService, paymentService } from '../../services';
@@ -14,11 +15,13 @@ export default function MisPedidosScreen() {
   const [pedidos, setPedidos] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [payingOrderId, setPayingOrderId] = useState<number | null>(null);
+  const [cancellingOrderId, setCancellingOrderId] = useState<number | null>(null);
   const usuarioId = user?.id || 0;
   const [modalFeedback, setModalFeedback] = useState<Order | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [pedidosConFeedback, setPedidosConFeedback] = useState<Set<number>>(new Set());
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (usuarioId) {
@@ -54,30 +57,49 @@ export default function MisPedidosScreen() {
     }
   };
 
+  const dialog = useDialog();
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([cargarPedidos(), cargarFeedbacks()]);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleCancelar = async (id: number) => {
-    Alert.alert(
+
+    if (!usuarioId) {
+      await dialog.showAlert('Error', 'Por favor inicia sesión para poder cancelar el pedido');
+      return;
+    }
+
+    const confirmed = await dialog.showConfirm(
       'Cancelar Pedido',
-      '¿Estás seguro de cancelar este pedido? Se devolverá el stock y el pedido será cancelado.',
-      [
-        { text: 'No', style: 'cancel' },
-        {
-          text: 'Sí, cancelar',
-          onPress: async () => {
-            try {
-              await orderService.cancel(id);
-              Alert.alert('Éxito', 'Pedido cancelado correctamente. El stock ha sido devuelto.');
-              await cargarPedidos();
-            } catch (error: any) {
-              const errorMessage = error.response?.data?.message || 
-                                  error.response?.data?.error || 
-                                  error.message || 
-                                  'Error al cancelar el pedido';
-              Alert.alert('Error', errorMessage);
-            }
-          },
-        },
-      ]
+      '¿Estás seguro de cancelar este pedido? Se devolverá el stock y el pedido será cancelado.'
     );
+
+    if (!confirmed) return;
+
+    setCancellingOrderId(id);
+    try {
+      await orderService.cancel(id);
+      await dialog.showAlert('Éxito', 'Pedido cancelado correctamente. El stock ha sido devuelto.');
+      await cargarPedidos();
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        await dialog.showAlert('Error', 'No autorizado. Por favor inicia sesión e inténtalo de nuevo.');
+      } else {
+        const errorMessage = error.response?.data?.message || 
+                            error.response?.data?.error || 
+                            error.message || 
+                            'Error al cancelar el pedido';
+        await dialog.showAlert('Error', errorMessage);
+      }
+    } finally {
+      setCancellingOrderId(null);
+    }
   };
 
   const handlePagar = async (pedido: Order) => {
@@ -230,7 +252,7 @@ export default function MisPedidosScreen() {
       alignItems: 'center',
     },
     modalContent: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.cardBackground,
       borderRadius: 12,
       padding: 24,
       width: '90%',
@@ -298,7 +320,7 @@ export default function MisPedidosScreen() {
 
   return (
     <View style={dynamicStyles.container}>
-      <ScrollView style={dynamicStyles.scrollView}>
+      <ScrollView style={dynamicStyles.scrollView} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}>
         <View style={dynamicStyles.header}>
           <Text style={dynamicStyles.title}>Mis Pedidos</Text>
         </View>
@@ -319,6 +341,7 @@ export default function MisPedidosScreen() {
                       onCancelar={handleCancelar}
                       onPagar={() => handlePagar(pedido)}
                       paying={payingOrderId === pedido.id}
+                      cancelling={cancellingOrderId === pedido.id}
                     />
                   </View>
                 ))}
@@ -333,6 +356,7 @@ export default function MisPedidosScreen() {
                     key={pedido.id}
                     pedido={pedido}
                     onCancelar={handleCancelar}
+                    cancelling={cancellingOrderId === pedido.id}
                   />
                 ))}
               </View>
@@ -345,6 +369,7 @@ export default function MisPedidosScreen() {
                   <PedidoCard
                     key={pedido.id}
                     pedido={pedido}
+                    cancelling={cancellingOrderId === pedido.id}
                   />
                 ))}
               </View>
@@ -359,6 +384,7 @@ export default function MisPedidosScreen() {
                     pedido={pedido}
                     onDarFeedback={handleDarFeedback}
                     hasFeedback={pedido.id ? pedidosConFeedback.has(pedido.id) : false}
+                    cancelling={cancellingOrderId === pedido.id}
                   />
                 ))}
               </View>
@@ -371,6 +397,7 @@ export default function MisPedidosScreen() {
                   <PedidoCard
                     key={pedido.id}
                     pedido={pedido}
+                    cancelling={cancellingOrderId === pedido.id}
                   />
                 ))}
               </View>

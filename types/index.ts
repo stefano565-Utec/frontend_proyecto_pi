@@ -37,7 +37,7 @@ export interface OrderDetail {
 export interface Order {
   id?: number;
   status: OrderStatus;
-  pickup_time?: string;
+  pickup_time?: number | string;
   userId: number;
   userName?: string;
   vendorId: number;

@@ -14,6 +14,7 @@ interface PedidoCardProps {
   onPagar?: (pedido: Order) => void;
   paying?: boolean;
   hasFeedback?: boolean;
+  cancelling?: boolean;
 }
 
 const PedidoCard: React.FC<PedidoCardProps> = ({ 
@@ -22,7 +23,8 @@ const PedidoCard: React.FC<PedidoCardProps> = ({
   onDarFeedback, 
   onPagar, 
   paying = false,
-  hasFeedback = false
+  hasFeedback = false,
+  cancelling = false,
 }) => {
   const { colors } = useTheme();
   const isWeb = Platform.OS === 'web';
@@ -218,7 +220,15 @@ const PedidoCard: React.FC<PedidoCardProps> = ({
         <View style={dynamicStyles.infoRow} className={isWeb ? 'pedido-card__info-row' : undefined}>
           <Text style={dynamicStyles.label} className={isWeb ? 'pedido-card__label' : undefined}>Hora de Recojo:</Text>
           <Text style={dynamicStyles.value} className={isWeb ? 'pedido-card__value' : undefined}>
-            {format(new Date(pedido.pickup_time), "dd/MM/yyyy HH:mm")}
+            {(() => {
+              try {
+                const raw = pedido.pickup_time as any;
+                const dt = typeof raw === 'number' ? new Date(raw) : new Date(raw);
+                return format(dt, "dd/MM/yyyy HH:mm");
+              } catch (e) {
+                return String(pedido.pickup_time);
+              }
+            })()}
           </Text>
         </View>
       )}
@@ -259,8 +269,8 @@ const PedidoCard: React.FC<PedidoCardProps> = ({
         )}
         
         {pedido.status === 'PENDIENTE_PAGO' && onCancelar && pedido.id && (
-          <Button variant="danger" size="small" onPress={() => onCancelar(pedido.id!)}>
-            Cancelar Pedido
+          <Button variant="danger" size="small" loading={cancelling} disabled={cancelling} onPress={() => onCancelar(pedido.id!)}>
+            {cancelling ? 'Cancelando...' : 'Cancelar Pedido'}
           </Button>
         )}
         

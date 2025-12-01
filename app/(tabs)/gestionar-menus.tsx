@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, TouchableOpacity, RefreshControl } from 'react-native';
 import { menuItemService, userService } from '../../services';
 import { useAuth, useTheme } from '../../context';
 import type { MenuItem } from '../../types';
@@ -105,7 +105,24 @@ export default function GestionarMenusScreen() {
 
   const getTodayDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      if (vendorId) {
+        await cargarMenuItems(vendorId);
+      } else {
+        await cargarVendorId();
+      }
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const abrirModal = (item?: MenuItem) => {
@@ -168,7 +185,7 @@ export default function GestionarMenusScreen() {
       if (formData.date && formData.date.trim()) {
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(formData.date.trim())) {
-          Alert.alert('Error', 'El formato de fecha es inválido. Use el formato yyyy-MM-dd (ej: 2025-01-15)');
+          Alert.alert('Error', `El formato de fecha es inválido. Use el formato yyyy-MM-dd (ej: ${getTodayDate()})`);
           return;
         }
         
@@ -479,7 +496,7 @@ export default function GestionarMenusScreen() {
   }
 
   return (
-    <ScrollView style={dynamicStyles.container}>
+    <ScrollView style={dynamicStyles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}>
       <View style={dynamicStyles.header}>
         <Text style={dynamicStyles.title}>Gestionar Menús</Text>
         <Button variant="primary" onPress={() => abrirModal()} style={dynamicStyles.addButton}>

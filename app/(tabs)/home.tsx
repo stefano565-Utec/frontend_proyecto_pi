@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Button, Card } from '../../components';
@@ -7,6 +8,17 @@ import { useTheme } from '../../context';
 export default function HomeScreen() {
   const router = useRouter();
   const { colors, isDark } = useTheme();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Home es estática; forzamos un pequeño refresco visual
+      await new Promise(resolve => setTimeout(resolve, 700));
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const dynamicStyles = StyleSheet.create({
     container: {
@@ -116,7 +128,7 @@ export default function HomeScreen() {
   });
 
   return (
-    <ScrollView style={dynamicStyles.container}>
+    <ScrollView style={dynamicStyles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}>
       <View style={dynamicStyles.hero}>
         <Text style={dynamicStyles.heroTitle}>Comedor Universitario UTEC</Text>
         <Text style={dynamicStyles.heroSubtitle}>

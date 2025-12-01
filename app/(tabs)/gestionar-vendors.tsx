@@ -327,6 +327,8 @@ export default function GestionarVendorsScreen() {
       padding: 24,
       maxHeight: '90%',
       alignSelf: 'center',
+      backgroundColor: colors.cardBackground,
+      borderRadius: 12,
     },
     modalScrollView: {
       maxHeight: 400,
