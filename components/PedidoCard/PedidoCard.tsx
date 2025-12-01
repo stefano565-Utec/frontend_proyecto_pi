@@ -274,7 +274,7 @@ const PedidoCard: React.FC<PedidoCardProps> = ({
           </Button>
         )}
         
-        {pedido.status === 'COMPLETADO' && onDarFeedback && (
+        {(['PAGADO','COMPLETADO'] as string[]).includes(pedido.status) && onDarFeedback && (
           <Button 
             variant="secondary" 
             size="small" 

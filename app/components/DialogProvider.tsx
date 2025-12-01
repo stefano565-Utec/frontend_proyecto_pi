@@ -58,8 +58,8 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
       {children}
 
       <Modal visible={visible} transparent animationType="fade">
-        <View style={styles.backdrop}>
-          <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
+        <View style={[styles.backdrop, { zIndex: 9999 }]}> 
+          <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border, zIndex: 10000 }]}> 
             <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
             {message ? <Text style={[styles.message, { color: colors.textSecondary }]}>{message}</Text> : null}
 
@@ -83,11 +83,16 @@ export const DialogProvider = ({ children }: { children: ReactNode }) => {
 
 const styles = StyleSheet.create({
   backdrop: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    zIndex: 9999,
   },
   container: {
     width: '100%',
@@ -95,6 +100,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     borderWidth: 1,
+    zIndex: 10000,
   },
   title: {
     fontSize: 18,

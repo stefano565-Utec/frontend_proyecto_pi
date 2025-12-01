@@ -104,7 +104,7 @@ export default function MisPedidosScreen() {
 
   const handlePagar = async (pedido: Order) => {
     if (!pedido.id || !pedido.vendorId) {
-      Alert.alert('Error', 'Información del pedido incompleta');
+      await dialog.showAlert('Error', 'Información del pedido incompleta');
       return;
     }
 
@@ -132,15 +132,15 @@ export default function MisPedidosScreen() {
                           error.response?.data?.error || 
                           error.message || 
                           'Error al crear el pago';
-      Alert.alert('Error', errorMessage);
+      await dialog.showAlert('Error', errorMessage);
     } finally {
       setPayingOrderId(null);
     }
   };
 
-  const handleDarFeedback = (pedido: Order) => {
+  const handleDarFeedback = async (pedido: Order) => {
     if (pedido.id && pedidosConFeedback.has(pedido.id)) {
-      Alert.alert('Ya has comentado', 'Solo puedes dejar un comentario por pedido. Ya has enviado un comentario para este pedido.');
+      await dialog.showAlert('Ya has comentado', 'Solo puedes dejar un comentario por pedido. Ya has enviado un comentario para este pedido.');
       return;
     }
     setModalFeedback(pedido);
@@ -157,31 +157,53 @@ export default function MisPedidosScreen() {
       : undefined;
 
     if (!firstMenuItemId) {
-      Alert.alert('Error', 'El pedido no tiene items para comentar');
+      await dialog.showAlert('Error', 'El pedido no tiene items para comentar');
       return;
     }
 
+    // Optimistically close the modal so it disappears immediately on web
+    const currentModal = modalFeedback;
+    const closedPedidoId = modalFeedback.id;
+    setModalFeedback(null);
+
     try {
-      await feedbackService.create({
+      const payload = {
         rating,
         comment: comment || undefined,
         userId: usuarioId,
-        orderId: modalFeedback.id,
+        orderId: closedPedidoId,
         menuItemId: firstMenuItemId,
-      });
+      };
+      console.log('Enviando feedback payload:', payload);
+      await feedbackService.create(payload);
 
-      Alert.alert('Éxito', '¡Feedback enviado con éxito!');
-      setModalFeedback(null);
-      if (modalFeedback?.id) {
-        setPedidosConFeedback(prev => new Set(prev).add(modalFeedback.id!));
+      if (closedPedidoId) {
+        setPedidosConFeedback(prev => new Set(prev).add(closedPedidoId));
       }
+
+      await dialog.showAlert('Éxito', '¡Feedback enviado con éxito!');
       cargarPedidos();
       cargarFeedbacks();
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error ||
+      console.error('Error al enviar feedback:', error);
+
+      // Show the error dialog while the feedback modal is closed so it appears on top
+      // Manejar error de ngrok / servidor no disponible
+      if (error && (error as any).isNgrokError) {
+        await dialog.showAlert('Error', error.message || 'Error de conexión con el servidor');
+        // Re-open modal so user can retry after dismissing the alert
+        setModalFeedback(currentModal);
+        return;
+      }
+
+      const errorMessage = error?.response?.data?.message || 
+                          error?.response?.data?.error ||
+                          error?.message ||
                           'Error al enviar el feedback';
-      Alert.alert('Error', errorMessage);
+
+      await dialog.showAlert('Error', errorMessage);
+      // Re-open modal so user can retry after dismissing the alert
+      setModalFeedback(currentModal);
     }
   };
 
@@ -356,6 +378,8 @@ export default function MisPedidosScreen() {
                     key={pedido.id}
                     pedido={pedido}
                     onCancelar={handleCancelar}
+                    onDarFeedback={handleDarFeedback}
+                    hasFeedback={pedido.id ? pedidosConFeedback.has(pedido.id) : false}
                     cancelling={cancellingOrderId === pedido.id}
                   />
                 ))}
