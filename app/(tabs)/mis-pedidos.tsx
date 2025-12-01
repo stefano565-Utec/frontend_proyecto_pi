@@ -177,6 +177,7 @@ export default function MisPedidosScreen() {
       console.log('Enviando feedback payload:', payload);
       await feedbackService.create(payload);
 
+      // Immediately add to set so button disables and prevents double-submit
       if (closedPedidoId) {
         setPedidosConFeedback(prev => new Set(prev).add(closedPedidoId));
       }
