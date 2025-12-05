@@ -8,6 +8,13 @@ import { Button, Loading, MenuCard } from '../../components';
 export default function GestionarMenusScreen() {
   const { user } = useAuth();
   const { colors, isDark } = useTheme();
+  const { width } = useWindowDimensions();
+  
+  // Calculate isMobileWeb at top level before any early returns
+  const isWeb = Platform.OS === 'web';
+  const isMobileUserAgent = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isMobileWeb = isWeb && (isMobileUserAgent || width < 768);
+
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [menuItemsFiltrados, setMenuItemsFiltrados] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -279,10 +286,6 @@ export default function GestionarMenusScreen() {
     setItemAEliminar(null);
   };
 
-  const { width } = useWindowDimensions();
-  const isWeb = Platform.OS === 'web';
-  const isMobileUserAgent = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isMobileWeb = isWeb && (isMobileUserAgent || width < 768);
   const bottomPadding = isMobileWeb ? 88 : 0;
 
   const dynamicStyles = StyleSheet.create({

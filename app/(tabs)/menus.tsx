@@ -13,6 +13,12 @@ export default function MenusScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { colors, isDark } = useTheme();
+  const { width } = useWindowDimensions();
+  
+  // Calculate isMobileWeb at top level before any early returns or conditional rendering
+  const isWeb = Platform.OS === 'web';
+  const isMobileUserAgent = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isMobileWeb = isWeb && (isMobileUserAgent || width < 768);
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [menuItemsFiltrados, setMenuItemsFiltrados] = useState<MenuItem[]>([]);
@@ -272,10 +278,6 @@ export default function MenusScreen() {
 
   if (loading) return <Loading />;
 
-  const { width } = useWindowDimensions();
-  const isWeb = Platform.OS === 'web';
-  const isMobileUserAgent = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isMobileWeb = isWeb && (isMobileUserAgent || width < 768);
   const bottomPadding = isMobileWeb ? 88 : 0;
 
   const dynamicStyles = StyleSheet.create({
