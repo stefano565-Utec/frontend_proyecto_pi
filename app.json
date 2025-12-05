@@ -29,7 +29,7 @@
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png",
-      "viewport": "width=device-width, initial-scale=1",
+      "viewport": "width=device-width, initial-scale=1, viewport-fit=cover",
       "display": "standalone",
       "scope": "/",
       "startUrl": "/"

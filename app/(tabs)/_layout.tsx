@@ -119,7 +119,7 @@ export default function TabLayout() {
             height: 60,
             paddingBottom: 8,
             paddingTop: 8,
-              ...(!isMobileWeb && isWeb && {
+              ...(isWeb && !isMobileWeb && {
                 display: 'none',
               }),
           },
@@ -130,7 +130,7 @@ export default function TabLayout() {
           tabBarIconStyle: {
             marginBottom: -3,
           },
-          headerShown: isMobileWeb && isWeb,
+          headerShown: isWeb ? isMobileWeb : false,
           headerStyle: {
             backgroundColor: colors.surface,
             borderBottomWidth: 1,
