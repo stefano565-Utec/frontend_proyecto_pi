@@ -90,7 +90,8 @@ export default function GestionarMenusScreen() {
         const nombre = item.itemName?.toLowerCase() || '';
         const descripcion = item.description?.toLowerCase() || '';
         const precio = item.price?.toLowerCase() || '';
-        const fecha = item.date ? new Date(item.date).toLocaleDateString('es-PE') : '';
+        // Usar la parte YYYY-MM-DD del ISO string para evitar conversiones automáticas de zona horaria
+        const fecha = item.date ? item.date.split('T')[0] : '';
         const fechaISO = item.date ? item.date.split('T')[0] : '';
         
         return nombre.includes(textoBusqueda) ||
@@ -203,7 +204,8 @@ export default function GestionarMenusScreen() {
           return;
         }
         
-        dateToSend = dateStr;
+        // Enviar la fecha con hora fija al mediodía para evitar desfases por zona horaria
+        dateToSend = dateStr + 'T12:00:00';
       }
 
       const menuItemData = {
