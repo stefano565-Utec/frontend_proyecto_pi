@@ -183,23 +183,27 @@ export default function GestionarMenusScreen() {
 
       let dateToSend: string | undefined = undefined;
       if (formData.date && formData.date.trim()) {
+        const dateStr = formData.date.trim();
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!dateRegex.test(formData.date.trim())) {
+        
+        if (!dateRegex.test(dateStr)) {
           Alert.alert('Error', `El formato de fecha es inválido. Use el formato yyyy-MM-dd (ej: ${getTodayDate()})`);
           return;
         }
         
-        const selectedDate = new Date(formData.date.trim());
+        // CORRECCIÓN: Parsear manualmente para respetar zona horaria local
+        const [yyyy, mm, dd] = dateStr.split('-').map(Number);
+        const selectedDate = new Date(yyyy, mm - 1, dd); // Mes es base 0
+
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        selectedDate.setHours(0, 0, 0, 0);
-        
+        today.setHours(0, 0, 0, 0); // Normalizar hoy a media noche
+
         if (selectedDate < today) {
           Alert.alert('Error', 'No se pueden crear menús para fechas pasadas. Por favor selecciona una fecha de hoy en adelante.');
           return;
         }
         
-        dateToSend = formData.date.trim();
+        dateToSend = dateStr;
       }
 
       const menuItemData = {
