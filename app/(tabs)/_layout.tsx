@@ -3,7 +3,7 @@ import { Platform, View, useWindowDimensions } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs, Redirect } from 'expo-router';
 import { useAuth, useTheme } from '../../context';
-import { Navbar } from '../../components';
+import { Navbar, MobileNavbar } from '../../components';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -107,6 +107,7 @@ export default function TabLayout() {
   return (
     <>
       {isWeb && !isMobileWeb && <Navbar items={navbarItems} />}
+      {isWeb && isMobileWeb && <MobileNavbar items={navbarItems} />}
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: colors.primary,
@@ -118,7 +119,7 @@ export default function TabLayout() {
             height: 60,
             paddingBottom: 8,
             paddingTop: 8,
-              ...(isWeb && !isMobileWeb && {
+              ...(isWeb && {
                 display: 'none',
               }),
           },
