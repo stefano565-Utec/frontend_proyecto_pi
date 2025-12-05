@@ -276,8 +276,6 @@ export default function MenusScreen() {
 
   const calcularTotalCarrito = () => carrito.reduce((total, c) => total + (parseFloat(c.item.price) * c.quantity), 0);
 
-  if (loading) return <Loading />;
-
   const bottomPadding = isMobileWeb ? 88 : 0;
 
   const dynamicStyles = StyleSheet.create({
@@ -328,6 +326,8 @@ export default function MenusScreen() {
     quantityButtonTextDisabled: { color: colors.textSecondary },
     modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, gap: 12 },
   });
+
+  if (loading) return <Loading />;
 
   return (
     <View style={dynamicStyles.container}>
