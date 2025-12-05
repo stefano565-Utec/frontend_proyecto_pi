@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, View, useWindowDimensions } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs, Redirect } from 'expo-router';
 import { useAuth, useTheme } from '../../context';
@@ -92,6 +92,10 @@ export default function TabLayout() {
   );
 
   const isWeb = Platform.OS === 'web';
+  const { width } = useWindowDimensions();
+  const isMobileUserAgent =
+    typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isMobileWeb = isWeb && (isMobileUserAgent || width < 768);
 
   const navbarItems = tabsToShow.map(([name, config]) => ({
     name,
@@ -102,21 +106,21 @@ export default function TabLayout() {
 
   return (
     <>
-      {isWeb && <Navbar items={navbarItems} />}
+      {isWeb && !isMobileWeb && <Navbar items={navbarItems} />}
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.textSecondary,
-          tabBarStyle: {
+            tabBarStyle: {
             backgroundColor: colors.surface,
             borderTopWidth: 1,
             borderTopColor: colors.border,
             height: 60,
             paddingBottom: 8,
             paddingTop: 8,
-            ...(isWeb && {
-              display: 'none',
-            }),
+              ...(isWeb && !isMobileWeb && {
+                display: 'none',
+              }),
           },
           tabBarLabelStyle: {
             fontSize: 12,

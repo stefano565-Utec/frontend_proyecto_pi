@@ -4,7 +4,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { Platform, AppState } from 'react-native';
+import { Platform, AppState, View, useWindowDimensions } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import 'react-native-reanimated';
 import { AuthProvider, ThemeProvider, useTheme } from '../context';
