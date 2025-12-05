@@ -2,13 +2,12 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { User, MenuItem, Order, Feedback, Vendor, LoginRequest, RegisterRequest, AuthResponse, OrderItem } from '../types';
 
-export const API_URL = 'https://calcanean-fundamentally-emmie.ngrok-free.dev';
+export const API_URL = 'https://backend-proyecto-pi.onrender.com/';
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
   },
 });
 
@@ -17,7 +16,6 @@ api.interceptors.request.use(async (config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  config.headers['ngrok-skip-browser-warning'] = 'true';
   
   if (config.data instanceof FormData && !config.headers['Content-Type']) {
     delete config.headers['Content-Type'];
@@ -36,10 +34,10 @@ api.interceptors.response.use(
     
     const contentType = error.response?.headers?.['content-type'] || error.response?.headers?.['Content-Type'] || '';
     if (contentType.includes('text/html')) {
-      const ngrokError = new Error('Error de conexión: El servidor no está disponible. Verifica que el backend esté corriendo y que ngrok esté configurado correctamente.');
-      (ngrokError as any).isNgrokError = true;
-      (ngrokError as any).originalError = error;
-      return Promise.reject(ngrokError);
+      const serverError = new Error('Error de conexión: El servidor devolvió una respuesta inesperada (HTML).');
+      (serverError as any).isServerError = true;
+      (serverError as any).originalError = error;
+      return Promise.reject(serverError);
     }
     
     return Promise.reject(error);
