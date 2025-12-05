@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Alert, ScrollView, Image } from 'react-native';
 import Button from '../Button/Button';
 import Card from '../Card/Card';
 import { vendorService } from '../../services';
@@ -20,7 +20,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ visible, total, vendorId, o
   const [selectedMethod, setSelectedMethod] = useState<'YAPE' | null>(null);
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loadingVendor, setLoadingVendor] = useState(false);
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   // Cargar información del vendor cuando se abre el modal
   useEffect(() => {
@@ -87,16 +87,48 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ visible, total, vendorId, o
                   <TouchableOpacity
                     style={[
                       styles.methodOption,
-                      { backgroundColor: colors.cardBackground, borderColor: colors.border },
-                      selectedMethod === 'YAPE' && { backgroundColor: colors.filterChipActive, borderColor: colors.filterChipActive },
+                      // Estilos base (sin seleccionar)
+                      { 
+                        backgroundColor: colors.cardBackground, 
+                        borderColor: colors.border 
+                      },
+                      
+                      // ESTILOS CUANDO ESTÁ SELECCIONADO (FIX PARA MODO OSCURO)
+                      selectedMethod === 'YAPE' && {
+                        // Borde: En claro usamos el morado oficial (#742384). 
+                        // En oscuro usamos un lila más claro (#D68CE6) para que brille y destaque.
+                        borderColor: isDark ? '#D68CE6' : '#742384',
+                        
+                        // Fondo: En claro un lila muy suave.
+                        // En oscuro, un morado muy transparente para que no choque con el fondo gris.
+                        backgroundColor: isDark ? 'rgba(116, 35, 132, 0.15)' : '#F3E5F5',
+                      }
                     ]}
                     onPress={() => handleMethodSelect('YAPE')}
                   >
-                    <Text style={styles.methodIcon}>💚</Text>
+                    {/* LOGO */}
+                    <Image 
+                      source={require('../../assets/images/logo-yape.png')}
+                      style={[
+                        styles.methodLogo,
+                        // En modo oscuro, le ponemos un fondo blanco redondeado al logo
+                        // para que resalte y no parezca un "sticker" pegado.
+                      ]}
+                      resizeMode="contain"
+                    />
+
+                    {/* TEXTO */}
                     <Text
                       style={[
                         styles.methodText,
-                        selectedMethod === 'YAPE' && { color: colors.primary },
+                        {
+                          // LÓGICA DE COLOR DE TEXTO:
+                          color: selectedMethod === 'YAPE'
+                            // Si está seleccionado: Blanco puro en oscuro (máximo contraste), Morado en claro.
+                            ? (isDark ? '#FFFFFF' : '#742384')
+                            // Si NO está seleccionado: El color de texto normal del tema.
+                            : colors.text
+                        }
                       ]}
                     >
                       Yape
@@ -177,8 +209,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   } as const,
   methodOptionSelected: {} as const,
-  methodIcon: {
-    fontSize: 40,
+  methodLogo: {
+    width: 60,   
+    height: 60,
     marginBottom: 8,
   } as const,
   methodText: {

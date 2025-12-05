@@ -245,7 +245,7 @@ const PedidoCard: React.FC<PedidoCardProps> = ({
           </View>
           {pedido.paymentMethod && (
             <Text style={dynamicStyles.paymentMethod} className={isWeb ? 'pedido-card__payment-method' : undefined}>
-              Pagado con: {pedido.paymentMethod === 'YAPE' ? '💚 Yape' : '💙 Plin'}
+              Pagado con: {pedido.paymentMethod === 'YAPE' ? 'Yape' : '💙 Plin'}
             </Text>
           )}
         </View>
