@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, TouchableOpacity, RefreshControl, Platform, useWindowDimensions } from 'react-native';
 import { menuItemService, userService } from '../../services';
 import { useAuth, useTheme } from '../../context';
 import type { MenuItem } from '../../types';
@@ -279,10 +279,17 @@ export default function GestionarMenusScreen() {
     setItemAEliminar(null);
   };
 
+  const { width } = useWindowDimensions();
+  const isWeb = Platform.OS === 'web';
+  const isMobileUserAgent = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isMobileWeb = isWeb && (isMobileUserAgent || width < 768);
+  const bottomPadding = isMobileWeb ? 88 : 0;
+
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
+      paddingBottom: bottomPadding,
     },
     header: {
       padding: 20,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, TouchableOpacity, Platform, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Modal, TextInput, TouchableOpacity, Platform, RefreshControl, useWindowDimensions } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { useRouter } from 'expo-router';
 import { menuItemService, orderService, vendorService } from '../../services';
@@ -272,8 +272,14 @@ export default function MenusScreen() {
 
   if (loading) return <Loading />;
 
+  const { width } = useWindowDimensions();
+  const isWeb = Platform.OS === 'web';
+  const isMobileUserAgent = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isMobileWeb = isWeb && (isMobileUserAgent || width < 768);
+  const bottomPadding = isMobileWeb ? 88 : 0;
+
   const dynamicStyles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
+    container: { flex: 1, backgroundColor: colors.background, paddingBottom: bottomPadding },
     scrollView: { flex: 1 },
     header: { padding: 20, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
     title: { fontSize: 24, fontWeight: 'bold', color: colors.text, marginBottom: 16 },
