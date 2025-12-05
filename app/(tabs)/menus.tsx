@@ -330,6 +330,7 @@ export default function MenusScreen() {
   return (
     <View style={dynamicStyles.container}>
       <ScrollView style={dynamicStyles.scrollView} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+        {isMobileWeb && (
         <View style={dynamicStyles.header}>
           <Text style={dynamicStyles.title}>Menús Disponibles</Text>
           <View style={dynamicStyles.filterContainer}>
@@ -362,11 +363,14 @@ export default function MenusScreen() {
             </View>
           )}
         </View>
+        )}
 
-        <View style={dynamicStyles.searchContainer}>
-          <TextInput style={dynamicStyles.searchInput} placeholder="Buscar por nombre, descripción, precio o vendor..." value={searchText} onChangeText={setSearchText} placeholderTextColor={colors.textSecondary} />
-          {searchText.length > 0 && (<TouchableOpacity style={dynamicStyles.clearButton} onPress={() => setSearchText('')}><Text style={dynamicStyles.clearButtonText}>✕</Text></TouchableOpacity>)}
-        </View>
+        {isMobileWeb && (
+          <View style={dynamicStyles.searchContainer}>
+            <TextInput style={dynamicStyles.searchInput} placeholder="Buscar por nombre, descripción, precio o vendor..." value={searchText} onChangeText={setSearchText} placeholderTextColor={colors.textSecondary} />
+            {searchText.length > 0 && (<TouchableOpacity style={dynamicStyles.clearButton} onPress={() => setSearchText('')}><Text style={dynamicStyles.clearButtonText}>✕</Text></TouchableOpacity>)}
+          </View>
+        )}
 
         {menuItemsFiltrados.length === 0 ? (
           <View style={dynamicStyles.emptyContainer}><Text style={dynamicStyles.emptyText}>{searchText.trim() ? 'No se encontraron menús que coincidan con la búsqueda' : 'No hay items disponibles'}</Text></View>
