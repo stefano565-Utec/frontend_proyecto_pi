@@ -17,8 +17,13 @@ export default function MenusScreen() {
   
   // Calculate isMobileWeb at top level before any early returns or conditional rendering
   const isWeb = Platform.OS === 'web';
-  const isMobileUserAgent = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isMobileWeb = isWeb && (isMobileUserAgent || width < 768);
+
+  // Improved mobile-web detection: combine userAgent, viewport width and touch support
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const isMobileUserAgent = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|Windows Phone|BlackBerry|IEMobile/i.test(ua);
+  const touchSupported = typeof navigator !== 'undefined' && (navigator.maxTouchPoints > 0 || (typeof window !== 'undefined' && 'ontouchstart' in window));
+  const isMobileWidth = width < 1024; // consider tablets and narrow desktops
+  const isMobileWeb = isWeb && ((isMobileUserAgent && touchSupported) || isMobileWidth || touchSupported);
 
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [menuItemsFiltrados, setMenuItemsFiltrados] = useState<MenuItem[]>([]);

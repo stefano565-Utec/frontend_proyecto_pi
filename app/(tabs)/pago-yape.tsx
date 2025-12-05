@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TextInput, KeyboardAvoidingView, Platform, Linking, Image, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { paymentService } from '../../services';
 import { useAuth, useTheme } from '../../context';
@@ -71,25 +71,57 @@ export default function PagoYapeScreen() {
 
     try {
       setLoading(true);
-      
+
       const phoneDigits = phoneNumber.trim().replace(/\D/g, '');
       const otpDigits = otp.trim().replace(/\D/g, '');
-      
+
       const token = await handleGenerateToken(phoneDigits, otpDigits);
       const paymentResponse = await paymentService.createYapePayment(orderId, token, user?.email || '');
-      
-      if (paymentResponse.data) {
-        Alert.alert(
-          'Pago Exitoso',
-          'Tu pago ha sido procesado correctamente.',
-          [
-            {
-              text: 'OK',
-              onPress: () => router.replace('/(tabs)/mis-pedidos'),
-            },
-          ]
-        );
+
+      // Debug log (temporary)
+      console.log('[PagoYape] paymentResponse:', paymentResponse?.data);
+
+      const resp = paymentResponse?.data;
+      // If backend returns a payment URL, open it so user completes the payment
+      if (resp?.paymentUrl) {
+        const url = resp.paymentUrl;
+        // On web and native, open the URL
+        try {
+          await Linking.openURL(url);
+          // After opening payment URL, navigate user to Mis Pedidos to wait for confirmation
+          Alert.alert('Pago', 'Se abrió la ventana de pago. Completa el pago en la plataforma externa.');
+          router.replace('/(tabs)/mis-pedidos');
+          return;
+        } catch (linkErr) {
+          console.warn('[PagoYape] error opening payment URL', linkErr);
+        }
       }
+
+      // If backend returns a QR code (base64 or URL), show it so user can scan
+      if (resp?.qrCode) {
+        // Simple handling: open as data URL if starts with data:, otherwise open link
+        const qr = resp.qrCode;
+        if (qr.startsWith('data:') || qr.startsWith('http')) {
+          try {
+            await Linking.openURL(qr);
+            Alert.alert('Pago', 'Se abrió el QR de pago. Escanéalo para completar el pago.');
+            router.replace('/(tabs)/mis-pedidos');
+            return;
+          } catch (e) {
+            console.warn('[PagoYape] error opening QR', e);
+          }
+        }
+      }
+
+      // If backend explicitly returns an approval indicator, honor it
+      if (resp && (((resp as any).status === 'approved') || ((resp as any).paymentStatus === 'approved') || ((resp as any).approved === true))) {
+        Alert.alert('Pago Exitoso', 'Tu pago ha sido procesado correctamente.', [{ text: 'OK', onPress: () => router.replace('/(tabs)/mis-pedidos') }]);
+        return;
+      }
+
+      // If none of the above, show a safe message with returned payload for debugging
+      Alert.alert('Pago', 'Respuesta recibida del servidor. Revisa "Mis Pedidos" para verificar el estado.', [{ text: 'OK', onPress: () => router.replace('/(tabs)/mis-pedidos') }]);
+
     } catch (error: any) {
       let errorMessage = 'Error al procesar el pago';
       
